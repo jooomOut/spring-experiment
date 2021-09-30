@@ -62,7 +62,7 @@ public class EventControllerTests {
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE))
                 .andExpect(jsonPath("id").value(Matchers.not(100)))
                 .andExpect(jsonPath("free").value(Matchers.not(true)))
-                .andExpect(jsonPath("eventStatus").value(EventStatus.DRAFT))
+                .andExpect(jsonPath("eventStatus").value(EventStatus.DRAFT.name()))
                 ;
     }
 }
