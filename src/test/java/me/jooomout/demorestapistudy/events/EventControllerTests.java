@@ -34,8 +34,9 @@ public class EventControllerTests {
     ObjectMapper objectMapper;
 
     @Test
+    @DisplayName("정상적인 이벤트 생성")
     void createEvent() throws Exception {
-        EventDto event = new EventDto().builder()
+        EventDto event = EventDto.builder()
                 .name("Spring")
                 .description("REST API - SPRING")
                 .beginEnrollmentDateTime(LocalDateTime.of(2021, 9, 29, 23, 36))
@@ -59,8 +60,8 @@ public class EventControllerTests {
                 .andExpect(jsonPath("id").exists())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE))
-                .andExpect(jsonPath("id").value(Matchers.not(100)))
-                .andExpect(jsonPath("free").value(Matchers.not(true)))
+                .andExpect(jsonPath("free").value(false))
+                .andExpect(jsonPath("offline").value(Matchers.not(true)))
                 .andExpect(jsonPath("eventStatus").value(EventStatus.DRAFT.name()))
         ;
     }
