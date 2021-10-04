@@ -2,6 +2,7 @@ package me.jooomout.demorestapistudy.events;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.Errors;
@@ -42,10 +43,16 @@ public class EventController {
         event.update();
 
         Event newEvent = this.eventRepository.save(event);
-        URI createdUri = linkTo(EventController.class)
-                .slash(newEvent.getId()).toUri();
 
-        return ResponseEntity.created(createdUri).body(event);
+        // Hateos
+        WebMvcLinkBuilder selfLinkBuilder = linkTo(EventController.class).slash(newEvent.getId());
+        URI createdUri = selfLinkBuilder.toUri();
+
+        EventResource eventResource = new EventResource(event);
+        eventResource.add(linkTo(EventController.class).withRel("query-events"));
+        eventResource.add(selfLinkBuilder.withRel("update-event")); // 수정은 PUT 이라 링크가 같아도 괜찮다.
+
+        return ResponseEntity.created(createdUri).body(eventResource);
     }
 
 }
