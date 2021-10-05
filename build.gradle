@@ -14,7 +14,12 @@ configurations {
         extendsFrom annotationProcessor
     }
 }
-
+asciidoctor {
+    //inputs.dir snippetsDir
+    sourceDir 'src/main/asciidoc'
+    attributes 'snippets': file('target/snippets')
+    dependsOn test
+}
 repositories {
     mavenCentral()
 }
@@ -40,6 +45,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation:2.5.4'
     // https://mvnrepository.com/artifact/pl.pragmatists/JUnitParams
     testImplementation 'pl.pragmatists:JUnitParams:1.1.1'
+    testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
 
 }
 
@@ -48,7 +54,4 @@ test {
     useJUnitPlatform()
 }
 
-asciidoctor {
-    inputs.dir snippetsDir
-    dependsOn test
-}
+
