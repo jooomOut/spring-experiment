@@ -21,7 +21,11 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 
+import static org.springframework.restdocs.headers.HeaderDocumentation.*;
+import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
+import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -62,7 +66,6 @@ public class EventControllerTests {
                         .content(objectMapper.writeValueAsString(event))
                 )
                 .andDo(print())
-                .andDo(document("create-event")) // create rest docs
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("id").exists())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
@@ -74,6 +77,56 @@ public class EventControllerTests {
                 .andExpect(jsonPath("_links.self").exists())
                 .andExpect(jsonPath("_links.query-events").exists())
                 .andExpect(jsonPath("_links.update-event").exists())
+
+                .andDo(document("create-event",
+                        links(
+                                linkWithRel("self").description("link to self"),
+                                linkWithRel("query-events").description("link to query events"),
+                                linkWithRel("update-event").description("link to update event")
+                        ),
+                        requestHeaders(
+                                headerWithName(HttpHeaders.ACCEPT).description("accept header"),
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("content type header")
+
+                        ),
+                        requestFields(
+                                fieldWithPath("name").description("Name of new event"),
+                                fieldWithPath("description").description("description of new event"),
+                                fieldWithPath("beginEnrollmentDateTime").description("date time of begin enrollment of new Event"),
+                                fieldWithPath("closeEnrollmentDateTime").description("date time of close enrollment of new Event"),
+                                fieldWithPath("beginEventDateTime").description("date time of begin of new Event"),
+                                fieldWithPath("endEventDateTime").description("date time of end of new Event"),
+                                fieldWithPath("location").description("location of new Event"),
+                                fieldWithPath("basePrice").description("basePrice of new Event"),
+                                fieldWithPath("maxPrice").description("maxPrice of new Event"),
+                                fieldWithPath("limitOfEnrollment").description("limit of new Event")
+                        ),
+                        responseHeaders(
+                                headerWithName(HttpHeaders.LOCATION).description("Location header"),
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("Content Type")
+                        ),
+                        //relaxedResponseFields( // relaxed ~ 는 일부분만 만들겠다는 표시. :: 단점 = 정확한 테스트를 할 수 없음!
+                        responseFields(
+                                fieldWithPath("id").description("Id of new event"),
+                                fieldWithPath("name").description("Name of new event"),
+                                fieldWithPath("description").description("description of new event"),
+                                fieldWithPath("beginEnrollmentDateTime").description("date time of begin enrollment of new Event"),
+                                fieldWithPath("closeEnrollmentDateTime").description("date time of close enrollment of new Event"),
+                                fieldWithPath("beginEventDateTime").description("date time of begin of new Event"),
+                                fieldWithPath("endEventDateTime").description("date time of end of new Event"),
+                                fieldWithPath("location").description("location of new Event"),
+                                fieldWithPath("basePrice").description("basePrice of new Event"),
+                                fieldWithPath("maxPrice").description("maxPrice of new Event"),
+                                fieldWithPath("limitOfEnrollment").description("limit of new Event"),
+                                fieldWithPath("free").description("it tells is this event is free or not"),
+                                fieldWithPath("offline").description("it tells is this event is offline or not"),
+                                fieldWithPath("eventStatus").description("event status"),
+                                // TODO: link 정보는 request에서 테스트가 진행됐는데 response에 당연히 들어가는 거라 테스트에서 걸림.
+                                fieldWithPath("_links.self.href").description("link to self"),
+                                fieldWithPath("_links.query-events.href").description("link to query event list"),
+                                fieldWithPath("_links.update-event.href").description("link to update existing event")
+                        )
+                )) // create rest docs
         ;
     }
 
