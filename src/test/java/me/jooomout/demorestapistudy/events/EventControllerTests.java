@@ -193,10 +193,11 @@ public class EventControllerTests {
                         .content(objectMapper.writeValueAsString(eventDto))
                 )
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$[0].objectName").exists())
+                .andExpect(jsonPath("errors[0].objectName").exists())
                 //.andExpect(jsonPath("$[0].field").exists()) // TODO: 글로벌 에러의 겨우 field가 없음 후조치하기
-                .andExpect(jsonPath("$[0].defaultMessage").exists())
-                .andExpect(jsonPath("$[0].code").exists())
+                .andExpect(jsonPath("errors[0].defaultMessage").exists())
+                .andExpect(jsonPath("errors[0].code").exists())
+                .andExpect(jsonPath("_links.index").exists())
                 //.andExpect(jsonPath("$[0].rejectedValue").exists())
         ;
     }
