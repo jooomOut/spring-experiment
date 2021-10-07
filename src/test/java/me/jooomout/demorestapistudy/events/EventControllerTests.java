@@ -285,7 +285,89 @@ public class EventControllerTests {
         )
                 .andDo(print())
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("id").exists())
+
                 ;
+    }
+
+    @Test
+    @DisplayName("기존 이벤트를 수정하는 테스트 - 이벤트가 없는 경우")
+    void updateEvent_404_Not_Found() throws Exception {
+        // GIVEN
+        Event event = generateEvent(100);
+        EventDto eventDto = EventDto.builder()
+                .name("Spring")
+                .description("REST API - SPRING")
+                .beginEnrollmentDateTime(LocalDateTime.of(2021, 9, 29, 23, 36))
+                .closeEnrollmentDateTime(LocalDateTime.of(2021, 9, 30, 01, 30))
+                .beginEventDateTime(LocalDateTime.of(2021, 10, 1, 0,0,0))
+                .endEventDateTime(LocalDateTime.of(2021, 10, 3, 23,59,59))
+                .basePrice(100)
+                .maxPrice(200)
+                .limitOfEnrollment(100)
+                .location("중앙대")
+                .build();
+
+        mockMvc.perform(patch("/api/events/{id}", 99999)
+                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaTypes.HAL_JSON)
+                        .content(objectMapper.writeValueAsString(eventDto))
+                )
+                .andDo(print())
+                .andExpect(status().isNotFound())
+        ;
+    }
+
+    @Test
+    @DisplayName("기존 이벤트를 수정하는 테스트 - 비어있는 입력 값")
+    void updateEvent_Empty_Input() throws Exception {
+        // GIVEN
+        Event event = generateEvent(100);
+        EventDto eventDto = EventDto.builder()
+                .name("Spring")
+                .description("REST API - SPRING")
+                .basePrice(100)
+                .maxPrice(200)
+                .limitOfEnrollment(100)
+                .location("중앙대")
+                .build();
+
+        mockMvc.perform(patch("/api/events/{id}", event.getId())
+                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaTypes.HAL_JSON)
+                        .content(objectMapper.writeValueAsString(eventDto))
+                )
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+        ;
+    }
+
+    @Test
+    @DisplayName("기존 이벤트를 수정하는 테스트 - 잘못된 입력 값")
+    void updateEvent_Wrong_Input() throws Exception {
+        // GIVEN
+        Event event = generateEvent(100);
+        EventDto eventDto = EventDto.builder()
+                .name("Spring")
+                .description("REST API - SPRING")
+                .beginEnrollmentDateTime(LocalDateTime.of(2021, 9, 30, 23, 36))
+                .closeEnrollmentDateTime(LocalDateTime.of(2021, 9, 29, 1, 30))
+                .beginEventDateTime(LocalDateTime.of(2021, 10, 1, 0,0,0))
+                .endEventDateTime(LocalDateTime.of(2021, 10, 3, 23,59,59))
+                .basePrice(100)
+                .maxPrice(200)
+                .limitOfEnrollment(100)
+                .location("중앙대")
+                .build();
+
+        mockMvc.perform(patch("/api/events/{id}", event.getId())
+                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaTypes.HAL_JSON)
+                        .content(objectMapper.writeValueAsString(eventDto))
+                )
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+        ;
     }
 
     private Event generateEvent(int index){

@@ -16,10 +16,12 @@ public class EventValidator {
             errors.reject("wrongPrices", "Values for prices are wrong");
         }
 
+        LocalDateTime closeEnrollmentDateTime = eventDto.getCloseEnrollmentDateTime();
         LocalDateTime endEventDateTime = eventDto.getEndEventDateTime();
         if (endEventDateTime.isBefore(eventDto.getBeginEventDateTime()) ||
                 endEventDateTime.isBefore(eventDto.getCloseEnrollmentDateTime()) ||
-                endEventDateTime.isBefore(eventDto.getBeginEventDateTime())
+                endEventDateTime.isBefore(eventDto.getBeginEventDateTime()) ||
+                closeEnrollmentDateTime.isBefore(eventDto.getBeginEnrollmentDateTime())
         ) {
             errors.rejectValue("endEventDateTime", "wrongValue", "EndEventDateTime is wrong");
         }
