@@ -1,5 +1,6 @@
 package me.jooomout.demorestapistudy.events;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import me.jooomout.demorestapistudy.common.TestConfiguration;
 import org.junit.jupiter.api.DisplayName;
@@ -23,8 +24,7 @@ import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.li
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -258,6 +258,34 @@ public class EventControllerTests {
         mockMvc.perform(get("/api/events/111111"))
                 .andExpect(status().isNotFound())
         ;
+    }
+
+    @Test
+    @DisplayName("기존 이벤트를 수정하는 테스트")
+    void updateEvent() throws Exception {
+        // GIVEN
+        Event event = generateEvent(100);
+        EventDto eventDto = EventDto.builder()
+                .name("Spring")
+                .description("REST API - SPRING")
+                .beginEnrollmentDateTime(LocalDateTime.of(2021, 9, 29, 23, 36))
+                .closeEnrollmentDateTime(LocalDateTime.of(2021, 9, 30, 01, 30))
+                .beginEventDateTime(LocalDateTime.of(2021, 10, 1, 0,0,0))
+                .endEventDateTime(LocalDateTime.of(2021, 10, 3, 23,59,59))
+                .basePrice(100)
+                .maxPrice(200)
+                .limitOfEnrollment(100)
+                .location("중앙대")
+                .build();
+
+        mockMvc.perform(patch("/api/events/{id}", event.getId())
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .accept(MediaTypes.HAL_JSON)
+                .content(objectMapper.writeValueAsString(eventDto))
+        )
+                .andDo(print())
+                .andExpect(status().isOk())
+                ;
     }
 
     private Event generateEvent(int index){
