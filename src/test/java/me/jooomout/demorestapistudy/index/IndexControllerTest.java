@@ -1,5 +1,6 @@
 package me.jooomout.demorestapistudy.index;
 
+import me.jooomout.demorestapistudy.common.BaseControllerTest;
 import me.jooomout.demorestapistudy.common.TestConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,15 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@AutoConfigureRestDocs(outputDir = "target/snippets")
-@Import(TestConfiguration.class)
-@ActiveProfiles("test")
-public class IndexControllerTest {
-
-    @Autowired
-    MockMvc mockMvc;
+public class IndexControllerTest extends BaseControllerTest {
 
     @Test
     void index() throws Exception {

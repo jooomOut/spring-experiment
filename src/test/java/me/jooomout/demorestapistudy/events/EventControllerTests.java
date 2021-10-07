@@ -1,22 +1,15 @@
 package me.jooomout.demorestapistudy.events;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import me.jooomout.demorestapistudy.common.TestConfiguration;
+import me.jooomout.demorestapistudy.common.BaseControllerTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.ui.ModelMap;
 
 import java.time.LocalDateTime;
 import java.util.stream.IntStream;
@@ -32,21 +25,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 //@WebMvcTest // for slicing test
-@SpringBootTest
-@AutoConfigureMockMvc
-@AutoConfigureRestDocs(outputDir = "target/snippets")
-@Import(TestConfiguration.class)
-@ActiveProfiles("test")
-public class EventControllerTests {
+
+public class EventControllerTests extends BaseControllerTest {
 
     @Autowired
-    MockMvc mockMvc;
-    @Autowired
-    ObjectMapper objectMapper;
-    @Autowired
     EventRepository eventRepository;
-    @Autowired
-    ModelMapper modelMapper;
+
     @Test
     @DisplayName("정상적인 이벤트 생성")
     void createEvent() throws Exception {
@@ -358,7 +342,7 @@ public class EventControllerTests {
                 .location("중앙대")
                 .build();
 
-        mockMvc.perform(patch("/api/events/{id}", 99999)
+        mockMvc.perform(put("/api/events/{id}", 99999)
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
                         .accept(MediaTypes.HAL_JSON)
                         .content(objectMapper.writeValueAsString(eventDto))
