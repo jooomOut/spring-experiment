@@ -88,6 +88,13 @@ public class EventController {
         if (optionalEvent.isEmpty()){
             return ResponseEntity.notFound().build();
         }
+        if (errors.hasErrors()){
+            return badRequest(errors);
+        }
+        eventValidator.validate(eventDto, errors);
+        if (errors.hasErrors()){
+            return badRequest(errors);
+        }
         Event event = optionalEvent.get();
         // TODO: 변경
 
