@@ -1,10 +1,13 @@
 package me.jooomout.demorestapistudy.accounts;
 
+import org.junit.Rule;
 import org.junit.jupiter.api.Test;
+import org.junit.rules.ExpectedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Set;
@@ -40,5 +43,22 @@ class AccountServiceTest {
 
         //THEN
         assertThat(userDetails.getPassword()).isEqualTo(password);
+    }
+
+    @Test
+    void findByUsernameFail(){
+        String username = "random";
+        // 1
+        /*try {
+            accountService.loadUserByUsername(username);
+            fail("supposed to be failed");
+        } catch(UsernameNotFoundException e){
+            assertThat(e.getMessage()).containsSequence(username);
+        }*/
+
+        // 2
+        assertThrows(UsernameNotFoundException.class,
+                () -> accountService.loadUserByUsername(username));
+
     }
 }
