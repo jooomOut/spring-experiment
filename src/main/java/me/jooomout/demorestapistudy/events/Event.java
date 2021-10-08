@@ -1,6 +1,7 @@
 package me.jooomout.demorestapistudy.events;
 
 import lombok.*;
+import me.jooomout.demorestapistudy.accounts.Account;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -26,6 +27,9 @@ public class Event {
     private int limitOfEnrollment;
     private boolean offline;
     private boolean free;
+
+    @ManyToOne
+    private Account manager;
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
