@@ -1,6 +1,7 @@
 package me.jooomout.demorestapistudy.configs;
 
 import me.jooomout.demorestapistudy.accounts.Account;
+import me.jooomout.demorestapistudy.accounts.AccountRepository;
 import me.jooomout.demorestapistudy.accounts.AccountRole;
 import me.jooomout.demorestapistudy.accounts.AccountService;
 import org.modelmapper.ModelMapper;
@@ -33,15 +34,23 @@ public class AppConfig {
 
             @Autowired
             AccountService accountService;
-
+            @Autowired
+            AppProperties appProperties;
             @Override
             public void run(ApplicationArguments args) throws Exception {
-                Account jOut = Account.builder()
-                        .email("jOut@naver.com")
+                Account admin = Account.builder()
+                        .email("admin@email.com")
+                        //.email(appProperties.getAdminUsername())
                         .password("jjjjj")
-                        .roles(Set.of(AccountRole.USER, AccountRole.ADMIN))
+                        .roles(Set.of(AccountRole.ADMIN))
                         .build();
-                accountService.saveAccount(jOut);
+                Account user = Account.builder()
+                        .email("user@email.com")
+                        .password("jjjjj")
+                        .roles(Set.of(AccountRole.USER))
+                        .build();
+                accountService.saveAccount(admin);
+                accountService.saveAccount(user);
             }
         };
     }

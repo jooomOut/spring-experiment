@@ -68,6 +68,9 @@ dependencies {
     // https://mvnrepository.com/artifact/org.springframework.security/spring-security-test
     testImplementation 'org.springframework.security:spring-security-test:5.3.11.RELEASE'
 
+    implementation 'org.springframework.boot:spring-boot-configuration-processor:2.5.5'
+
+
 
 
 }
