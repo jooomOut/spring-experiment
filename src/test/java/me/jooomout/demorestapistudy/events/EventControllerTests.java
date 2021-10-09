@@ -1,17 +1,23 @@
 package me.jooomout.demorestapistudy.events;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import me.jooomout.demorestapistudy.accounts.Account;
+import me.jooomout.demorestapistudy.accounts.AccountRepository;
+import me.jooomout.demorestapistudy.accounts.AccountRole;
+import me.jooomout.demorestapistudy.accounts.AccountService;
 import me.jooomout.demorestapistudy.common.BaseControllerTest;
+import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.oauth2.common.util.Jackson2JsonParser;
+import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.stream.IntStream;
 
 import static org.springframework.restdocs.headers.HeaderDocumentation.*;
@@ -19,6 +25,7 @@ import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.li
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -30,6 +37,41 @@ public class EventControllerTests extends BaseControllerTest {
 
     @Autowired
     EventRepository eventRepository;
+    @Autowired
+    AccountService accountService;
+    @Autowired
+    AccountRepository accountRepository;
+
+    @BeforeEach
+    public void setUp(){
+        this.eventRepository.deleteAll();
+        this.accountRepository.deleteAll();
+    }
+
+
+    private String getBearerToken() throws Exception {
+        String username = "authToken@email.com";
+        String password = "jjjjj";
+        Account tester = Account.builder()
+                .email(username)
+                .password(password)
+                .roles(Set.of(AccountRole.ADMIN, AccountRole.USER))
+                .build();
+        accountService.saveAccount(tester);
+
+        String clientId = "myApp";
+        String clientSecret = "pass";
+        ResultActions perform = mockMvc.perform(post("/oauth/token") // 해당 URL 은 알아서 생김
+                        .with(httpBasic(clientId, clientSecret))
+                        .param("username", username)
+                        .param("password", password)
+                        .param("grant_type", "password"));
+
+        var responseBody = perform.andReturn().getResponse().getContentAsString();
+        Jackson2JsonParser parser = new Jackson2JsonParser();
+
+        return parser.parseMap(responseBody).get("access_token").toString();
+    }
 
     @Test
     @DisplayName("정상적인 이벤트 생성")
@@ -49,6 +91,7 @@ public class EventControllerTests extends BaseControllerTest {
 
 
         mockMvc.perform(post("/api/events/")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + getBearerToken())
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
                         .accept(MediaTypes.HAL_JSON)
                         .content(objectMapper.writeValueAsString(event))
@@ -95,7 +138,7 @@ public class EventControllerTests extends BaseControllerTest {
                                 headerWithName(HttpHeaders.CONTENT_TYPE).description("Content Type")
                         ),
                         //relaxedResponseFields( // relaxed ~ 는 일부분만 만들겠다는 표시. :: 단점 = 정확한 테스트를 할 수 없음!
-                        responseFields(
+                        relaxedResponseFields(
                                 fieldWithPath("id").description("Id of new event"),
                                 fieldWithPath("name").description("Name of new event"),
                                 fieldWithPath("description").description("description of new event"),
@@ -140,6 +183,7 @@ public class EventControllerTests extends BaseControllerTest {
 
 
         mockMvc.perform(post("/api/events/")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + getBearerToken())
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
                         .accept(MediaTypes.HAL_JSON)
                         .content(objectMapper.writeValueAsString(event))
@@ -154,6 +198,7 @@ public class EventControllerTests extends BaseControllerTest {
         EventDto eventDto = EventDto.builder().build();
 
         mockMvc.perform(post("/api/events")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + getBearerToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(eventDto))
                 )
@@ -180,6 +225,7 @@ public class EventControllerTests extends BaseControllerTest {
 
 
         mockMvc.perform(post("/api/events")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + getBearerToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(eventDto))
                 )
@@ -258,6 +304,7 @@ public class EventControllerTests extends BaseControllerTest {
 
 
         mockMvc.perform(put("/api/events/{id}", event.getId())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + getBearerToken())
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .accept(MediaTypes.HAL_JSON)
                 .content(objectMapper.writeValueAsString(eventDto))
@@ -300,7 +347,7 @@ public class EventControllerTests extends BaseControllerTest {
                                 headerWithName(HttpHeaders.CONTENT_TYPE).description("Content Type")
                         ),
                         //relaxedResponseFields( // relaxed ~ 는 일부분만 만들겠다는 표시. :: 단점 = 정확한 테스트를 할 수 없음!
-                        responseFields(
+                        relaxedResponseFields(
                                 fieldWithPath("id").description("Id of new event"),
                                 fieldWithPath("name").description("Name of new event"),
                                 fieldWithPath("description").description("description of new event"),
@@ -343,6 +390,7 @@ public class EventControllerTests extends BaseControllerTest {
                 .build();
 
         mockMvc.perform(put("/api/events/{id}", 99999)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + getBearerToken())
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
                         .accept(MediaTypes.HAL_JSON)
                         .content(objectMapper.writeValueAsString(eventDto))
@@ -367,6 +415,7 @@ public class EventControllerTests extends BaseControllerTest {
                 .build();
 
         mockMvc.perform(put("/api/events/{id}", event.getId())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + getBearerToken())
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
                         .accept(MediaTypes.HAL_JSON)
                         .content(objectMapper.writeValueAsString(eventDto))
@@ -386,6 +435,7 @@ public class EventControllerTests extends BaseControllerTest {
         eventDto.setMaxPrice(200);
 
         mockMvc.perform(put("/api/events/{id}", event.getId())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + getBearerToken())
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
                         .accept(MediaTypes.HAL_JSON)
                         .content(objectMapper.writeValueAsString(eventDto))
