@@ -65,6 +65,10 @@ dependencies {
     // https://mvnrepository.com/artifact/org.springframework.security.oauth.boot/spring-security-oauth2-autoconfigure
     implementation 'org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure:2.3.12.RELEASE'
 
+    // https://mvnrepository.com/artifact/org.springframework.security/spring-security-test
+    testImplementation 'org.springframework.security:spring-security-test:5.3.11.RELEASE'
+
+
 
 }
 
