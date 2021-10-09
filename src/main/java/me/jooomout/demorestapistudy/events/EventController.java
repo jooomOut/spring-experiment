@@ -92,7 +92,7 @@ public class EventController {
         Event event = optionalEvent.get();
         EventResource eventResource = new EventResource(event);
         eventResource.add(Link.of("/docs/index.html#resources-events-get").withRel("profile")); // index.adoc 에 이름이 정의되어 있다.
-        if (event.getManager().equals(account)){
+        if (event.getManager() != null && event.getManager().equals(account)){
             eventResource.add(linkTo(EventController.class).slash(event.getId()).withRel("update-event"));
         }
         return ResponseEntity.ok(eventResource);
@@ -115,7 +115,7 @@ public class EventController {
             return badRequest(errors);
         }
         Event existingEvent = optionalEvent.get();
-        if(!existingEvent.getManager().equals(account)){
+        if(existingEvent.getManager() != null &&!existingEvent.getManager().equals(account)){
             return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
         modelMapper.map(eventDto, existingEvent);
