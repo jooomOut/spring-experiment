@@ -1,7 +1,9 @@
 package me.jooomout.demorestapistudy.events;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.*;
 import me.jooomout.demorestapistudy.accounts.Account;
+import me.jooomout.demorestapistudy.accounts.AccountSerializer;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -29,6 +31,7 @@ public class Event {
     private boolean free;
 
     @ManyToOne
+    @JsonSerialize(using = AccountSerializer.class)
     private Account manager;
 
     @Builder.Default
