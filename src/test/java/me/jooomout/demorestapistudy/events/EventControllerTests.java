@@ -50,7 +50,7 @@ public class EventControllerTests extends BaseControllerTest {
 
 
     private String getBearerToken() throws Exception {
-        String username = "authToken@email.com";
+        String username = "user@email.com";
         String password = "jjjjj";
         Account tester = Account.builder()
                 .email(username)
@@ -233,15 +233,40 @@ public class EventControllerTests extends BaseControllerTest {
                 .andExpect(jsonPath("errors[0].objectName").exists())
                 //.andExpect(jsonPath("$[0].field").exists()) // TODO: 글로벌 에러의 겨우 field가 없음 후조치하기
                 .andExpect(jsonPath("errors[0].defaultMessage").exists())
-                .andExpect(jsonPath("errors[0].code").exists())
                 .andExpect(jsonPath("_links.index").exists())
                 //.andExpect(jsonPath("$[0].rejectedValue").exists())
         ;
     }
 
     @Test
-    @DisplayName("30개의 이벤트를 10개씩 두 번째 페이지 조회하기")
+    @DisplayName("30개의 이벤트를 10개씩 두 번째 페이지 조회하기 - 인증 O")
     void queryEvents() throws Exception{
+        // GIVEN - event 30개
+        IntStream.range(0, 30).forEach(i -> {
+            this.generateEvent(i);
+        });
+
+        // WHEN && THEN
+        mockMvc.perform(get("/api/events")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + getBearerToken())
+                        .param("page", "1")
+                        .param("size", "10")
+                        .param("sort", "name,DESC")
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("page").exists())
+                .andExpect(jsonPath("_embedded.eventList[0]._links.self").exists())
+                .andExpect(jsonPath("_links.self").exists())
+                .andExpect(jsonPath("_links.profile").exists())
+                .andExpect(jsonPath("_links.create-event").exists())
+                .andDo(document("query-events")) // TODO: 얘는 직접 추가해줘야 함 controller
+                ;
+    }
+
+    @Test
+    @DisplayName("30개의 이벤트를 10개씩 두 번째 페이지 조회하기 - 인증 X")
+    void queryEvents_No_Auth() throws Exception{
         // GIVEN - event 30개
         IntStream.range(0, 30).forEach(i -> {
             this.generateEvent(i);
@@ -253,15 +278,15 @@ public class EventControllerTests extends BaseControllerTest {
                         .param("size", "10")
                         .param("sort", "name,DESC")
                 )
-                .andDo(print())
+                //.andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("page").exists())
                 .andExpect(jsonPath("_embedded.eventList[0]._links.self").exists())
                 .andExpect(jsonPath("_links.self").exists())
                 .andExpect(jsonPath("_links.profile").exists())
+                .andExpect(jsonPath("_links.create-event").doesNotExist())
                 .andDo(document("query-events")) // TODO: 얘는 직접 추가해줘야 함 controller
-                ;
-
+        ;
     }
 
     @Test

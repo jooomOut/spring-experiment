@@ -18,6 +18,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,7 +43,9 @@ public class EventController {
     }
 
     @PostMapping
-    public ResponseEntity createEvent(@RequestBody @Valid EventDto eventDto, Errors errors,
+    public ResponseEntity createEvent(@RequestBody @Valid EventDto eventDto,
+                                      BindingResult errors,
+                                      //Errors errors,
                                       @CurrentUser Account account) {
         if (errors.hasErrors()){
             return badRequest(errors);
@@ -101,7 +104,9 @@ public class EventController {
 
     @PutMapping("/{id}")
     public ResponseEntity updateEvent(@PathVariable Integer id,
-                                      @RequestBody @Valid EventDto eventDto, Errors errors,
+                                      @RequestBody @Valid EventDto eventDto,
+                                      BindingResult errors,
+                                      //Errors errors,
                                       @CurrentUser Account account){
         Optional<Event> optionalEvent = eventRepository.findById(id);
         if (optionalEvent.isEmpty()){
