@@ -17,17 +17,22 @@ public class EventValidator {
 
     public void validate(EventDto eventDto, BindingResult errors){
         if (eventDto.getBasePrice() > eventDto.getMaxPrice() && eventDto.getMaxPrice() != 0) {
-            // rejectValue - 필드에 들어가는 에러
-            //errors.rejectValue("basePrice", "wrongValue", "BasePrice is wrong");
+            //rejectValue - 필드에 들어가는 에러
+            errors.rejectValue("basePrice", "wrong",
+                    ms.getMessage("wrong.eventDto.basePrice", null, null));
+            /*errors.addError(new FieldError("eventDto", "basePrice", null, false,
+                    new String[]{"wrong.event.price"}, null,
+                    //ms.getMessage("wrong.event.price", null, null)
+                    null
+            ));*/
+            // =================================================
             // reject - 글로벌 에러
+            errors.reject("wrongPrices", "Values for prices are wrong");
             //errors.addError(new ObjectError("event", "wrong value")); //글로벌 에러
             // 필드 에러
-            System.out.println(ms.getMessage("wrong.event.price", null, null));
 
-            errors.addError(new FieldError("event", "price", null, false,
-                                    new String[]{"wrong.event.price"}, null,
-                    ms.getMessage("wrong.event.price", null, null)));
-            //errors.reject("wrongPrices", "Values for prices are wrong");
+
+
         }
 
         LocalDateTime closeEnrollmentDateTime = eventDto.getCloseEnrollmentDateTime();
