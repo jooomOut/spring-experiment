@@ -44,7 +44,7 @@ public class EventController {
     }
 
     @PostMapping
-    public ResponseEntity createEvent(@RequestBody @Validated(CreateCheckEvent.class) EventDto eventDto,
+    public ResponseEntity createEvent(@RequestBody @Validated EventDto eventDto,
                                       BindingResult errors,
                                       //Errors errors,
                                       @CurrentUser Account account) {
