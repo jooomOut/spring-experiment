@@ -15,7 +15,7 @@ public class EventDto {
     @NotEmpty
     private String description;
 
-    @NotNull
+    @NotNull(message = "공백은 않되!")
     private LocalDateTime beginEnrollmentDateTime;
     @NotNull
     private LocalDateTime closeEnrollmentDateTime;

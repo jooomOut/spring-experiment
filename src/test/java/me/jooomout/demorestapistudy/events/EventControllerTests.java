@@ -202,6 +202,7 @@ public class EventControllerTests extends BaseControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(eventDto))
                 )
+                .andDo(print())
                 .andExpect(status().isBadRequest())
                 ;
     }
