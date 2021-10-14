@@ -20,6 +20,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -43,7 +44,7 @@ public class EventController {
     }
 
     @PostMapping
-    public ResponseEntity createEvent(@RequestBody @Valid EventDto eventDto,
+    public ResponseEntity createEvent(@RequestBody @Validated(CreateCheckEvent.class) EventDto eventDto,
                                       BindingResult errors,
                                       //Errors errors,
                                       @CurrentUser Account account) {

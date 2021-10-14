@@ -10,18 +10,18 @@ import java.time.LocalDateTime;
 @Data @Builder @NoArgsConstructor @AllArgsConstructor
 public class EventDto {
 
-    @NotEmpty
+    @NotEmpty(groups = {CreateCheckEvent.class, UpdateCheckEvent.class})
     private String name;
-    @NotEmpty
+    @NotEmpty(groups = CreateCheckEvent.class)
     private String description;
 
     @NotNull(message = "공백은 않되!")
     private LocalDateTime beginEnrollmentDateTime;
-    @NotNull
+    @NotNull(groups = {CreateCheckEvent.class, UpdateCheckEvent.class})
     private LocalDateTime closeEnrollmentDateTime;
-    @NotNull
+    @NotNull(groups = {CreateCheckEvent.class, UpdateCheckEvent.class})
     private LocalDateTime beginEventDateTime;
-    @NotNull
+    @NotNull(groups = {CreateCheckEvent.class, UpdateCheckEvent.class})
     private LocalDateTime endEventDateTime;
 
     private String location; // (optional)
@@ -31,5 +31,6 @@ public class EventDto {
     private int maxPrice; // optional
     @Min(0)
     private int limitOfEnrollment;
+
 
 }
