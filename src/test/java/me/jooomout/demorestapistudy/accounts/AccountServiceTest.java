@@ -1,6 +1,9 @@
 package me.jooomout.demorestapistudy.accounts;
 
 import org.junit.Rule;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +13,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 import java.util.Set;
 
@@ -18,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@Testcontainers
 class AccountServiceTest {
 
     @Autowired
@@ -27,13 +36,24 @@ class AccountServiceTest {
     @Autowired
     PasswordEncoder passwordEncoder;
 
+    @Container
+    static PostgreSQLContainer postgreSQLContainer =
+            new PostgreSQLContainer<>("postgres:latest")
+                    .withEnv("POSTGRES_DB", "testContainer");
+
+
+    /*@Container
+    public GenericContainer db = new GenericContainer(DockerImageName.parse("postgres:latest"))
+            .withEnv("POSTGRES_DB", "studytest");*/
+
+
     @Test
     void findByUserName(){
         // GIVEN
-        String userName = "rimeilo324@naver.com";
+        String username = "rimeilo324@naver.com";
         String password = "jjjjj";
         Account account = Account.builder()
-                .email(userName)
+                .email(username)
                 .password(password)
                 .roles(Set.of(AccountRole.ADMIN, AccountRole.USER))
                 .build()
@@ -42,7 +62,7 @@ class AccountServiceTest {
 
         // WHEN
         UserDetailsService userDetailsService = (UserDetailsService) accountService;
-        UserDetails userDetails = userDetailsService.loadUserByUsername(userName);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
         //THEN
         assertThat(passwordEncoder.matches(password, userDetails.getPassword())).isTrue();
@@ -50,7 +70,7 @@ class AccountServiceTest {
 
     @Test
     void findByUsernameFail(){
-        String username = "random";
+        String username = "random@naver.com";
         // 1
         /*try {
             accountService.loadUserByUsername(username);
