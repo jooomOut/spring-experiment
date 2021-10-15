@@ -40,6 +40,12 @@ public class AccountService implements UserDetailsService {
         return new AccountAdapter(account);
     }
 
+    public Account login(Account account){
+        return accountRepository.findByEmail(account.getEmail())
+                .filter(a -> a.getPassword().equals(account.getPassword()))
+                .orElse(null);
+    }
+
     private Collection<? extends GrantedAuthority> authorities(Set<AccountRole> roles) {
         return roles.stream().map(r -> {
             return new SimpleGrantedAuthority("ROLE_" + r.name());

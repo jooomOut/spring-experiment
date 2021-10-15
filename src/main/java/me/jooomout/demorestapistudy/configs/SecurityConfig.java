@@ -63,8 +63,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter { // adapter �
                 .formLogin()
                     .and()
                 .authorizeRequests()
-                    .mvcMatchers(HttpMethod.GET, "/api/**").authenticated() // api/** 의 GET 모두 허용
+                    .antMatchers(HttpMethod.POST,"/api/account/**").permitAll()
+                    .antMatchers(HttpMethod.GET, "/api/**").permitAll() // api/** 의 GET 모두 허용
                     .anyRequest().authenticated() // 나머지는 권한 있어야 함
+                .and()
+                    .csrf().disable();
                 ;
     }
 
