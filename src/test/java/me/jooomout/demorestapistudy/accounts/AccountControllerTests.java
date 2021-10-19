@@ -46,15 +46,15 @@ public class AccountControllerTests extends BaseControllerTest {
                 .password("jjjjj")
                 .build();
 
-        /*mockMvc.perform(post("/api/account/login")
+        mockMvc.perform(post("/api/account/login")
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
                         .accept(MediaTypes.HAL_JSON)
                         .content(objectMapper.writeValueAsString(accountDto))
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
-        ;*/
-        var result = accountController.login(accountDto);
-        assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+        ;
+        //var result = accountController.login(accountDto);
+        //assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 }

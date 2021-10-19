@@ -8,6 +8,10 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 
+
+/*
+* ResourceServerConfigureAdapter 가 WebSecurityConfigurerAdapter 보다 높은 순위에 있다.
+* */
 @Configuration
 @EnableResourceServer
 public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
@@ -24,6 +28,8 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
                 .authorizeRequests()
                     .mvcMatchers(HttpMethod.GET, "/api/**")
                         .permitAll()
+                .mvcMatchers(HttpMethod.POST, "/api/account/login")
+                    .permitAll()
                     .anyRequest()
                         .authenticated()
                 /*.and()
