@@ -38,15 +38,15 @@ public class AccountController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity login(@RequestBody AccountDto accountDto) {
-        /*if (errors.hasErrors()){
+    public ResponseEntity login(@RequestBody @Validated AccountDto accountDto, BindingResult errors) {
+        if (errors.hasErrors()){
             return badRequest(errors);
-        }*/
-        /*Account formAccount = dtoToEntity(accountDto);
+        }
+        Account formAccount = dtoToEntity(accountDto);
         Account result = accountService.login(formAccount);
         if (result == null){
             return ResponseEntity.notFound().build();
-        }*/
+        }
         return ResponseEntity.ok().build();
     }
 

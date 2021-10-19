@@ -43,6 +43,7 @@ public class AccountControllerTests extends BaseControllerTest {
     void login() throws Exception {
         AccountDto accountDto = AccountDto.builder()
                 .email("user@email.com")
+
                 .password("jjjjj")
                 .build();
 

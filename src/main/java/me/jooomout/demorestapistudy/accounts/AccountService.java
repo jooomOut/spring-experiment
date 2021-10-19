@@ -42,7 +42,7 @@ public class AccountService implements UserDetailsService {
 
     public Account login(Account account){
         return accountRepository.findByEmail(account.getEmail())
-                .filter(a -> a.getPassword().equals(account.getPassword()))
+                .filter(a -> passwordEncoder.matches(account.getPassword(), a.getPassword()))
                 .orElse(null);
     }
 
