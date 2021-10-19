@@ -45,7 +45,8 @@ public class AccountController {
         Account formAccount = dtoToEntity(accountDto);
         Account result = accountService.login(formAccount);
         if (result == null){
-            return ResponseEntity.notFound().build();
+            errors.reject("loginFail", "ID or PW is not correct.");
+            return badRequest(errors);
         }
         return ResponseEntity.ok().build();
     }

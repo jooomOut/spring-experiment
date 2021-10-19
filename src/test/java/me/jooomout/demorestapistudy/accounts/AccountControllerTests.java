@@ -39,11 +39,10 @@ public class AccountControllerTests extends BaseControllerTest {
     AccountController accountController;
 
     @Test
-    @DisplayName("로그인 시도")
+    @DisplayName("정상 로그인 시도")
     void login() throws Exception {
         AccountDto accountDto = AccountDto.builder()
                 .email("user@email.com")
-
                 .password("jjjjj")
                 .build();
 
@@ -55,7 +54,38 @@ public class AccountControllerTests extends BaseControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
         ;
-        //var result = accountController.login(accountDto);
-        //assertThat(result.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+    @Test
+    @DisplayName("ID 잘못된 로그인 시도")
+    void login_wrongId() throws Exception {
+        AccountDto accountDto = AccountDto.builder()
+                .email("no@il.com")
+                .password("jjjjj")
+                .build();
+        mockMvc.perform(post("/api/account/login")
+                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaTypes.HAL_JSON)
+                        .content(objectMapper.writeValueAsString(accountDto))
+                )
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+        ;
+    }
+    @Test
+    @DisplayName("PW 잘못된 로그인 시도")
+    void login_wrongPw() throws Exception {
+        AccountDto accountDto = AccountDto.builder()
+                .email("user@email.com")
+                .password("123")
+                .build();
+
+        mockMvc.perform(post("/api/account/login")
+                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaTypes.HAL_JSON)
+                        .content(objectMapper.writeValueAsString(accountDto))
+                )
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+        ;
     }
 }
