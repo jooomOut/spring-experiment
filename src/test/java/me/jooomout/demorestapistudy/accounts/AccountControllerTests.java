@@ -53,6 +53,7 @@ public class AccountControllerTests extends BaseControllerTest {
                 )
                 .andDo(print())
                 .andExpect(status().isOk())
+                .andExpect(cookie().exists("email"))
         ;
     }
     @Test

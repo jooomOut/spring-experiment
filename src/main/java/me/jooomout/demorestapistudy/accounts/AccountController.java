@@ -18,6 +18,8 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.net.URI;
 import java.util.Optional;
@@ -38,7 +40,8 @@ public class AccountController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity login(@RequestBody @Validated AccountDto accountDto, BindingResult errors) {
+    public ResponseEntity login(@RequestBody @Validated AccountDto accountDto, BindingResult errors,
+                                HttpServletResponse response) {
         if (errors.hasErrors()){
             return badRequest(errors);
         }
@@ -48,6 +51,10 @@ public class AccountController {
             errors.reject("loginFail", "ID or PW is not correct.");
             return badRequest(errors);
         }
+
+        Cookie emailCookie = new Cookie("email", result.getEmail());
+        response.addCookie(emailCookie);
+
         return ResponseEntity.ok().build();
     }
 
