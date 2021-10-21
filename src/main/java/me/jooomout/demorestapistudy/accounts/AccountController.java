@@ -52,8 +52,9 @@ public class AccountController {
             return badRequest(errors);
         }
 
-        Cookie emailCookie = new Cookie("email", result.getEmail());
-        response.addCookie(emailCookie);
+        Cookie cookie = new Cookie("id", String.valueOf(result.getId()));
+        cookie.setMaxAge(3000);
+        response.addCookie(cookie);
 
         return ResponseEntity.ok().build();
     }
