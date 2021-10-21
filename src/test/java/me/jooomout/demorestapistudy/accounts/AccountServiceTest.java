@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Testcontainers
+//@Testcontainers
 class AccountServiceTest {
 
     @Autowired
@@ -36,10 +36,10 @@ class AccountServiceTest {
     @Autowired
     PasswordEncoder passwordEncoder;
 
-    @Container
+    /*@Container
     static PostgreSQLContainer postgreSQLContainer =
             new PostgreSQLContainer<>("postgres:latest")
-                    .withEnv("POSTGRES_DB", "testContainer");
+                    .withEnv("POSTGRES_DB", "testContainer");*/
 
 
     /*@Container
