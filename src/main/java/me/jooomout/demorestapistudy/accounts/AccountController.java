@@ -2,6 +2,7 @@ package me.jooomout.demorestapistudy.accounts;
 
 import me.jooomout.demorestapistudy.common.ErrorsResource;
 import me.jooomout.demorestapistudy.events.*;
+import me.jooomout.demorestapistudy.session.SessionManager;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,6 +20,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.net.URI;
@@ -32,11 +34,12 @@ public class AccountController {
 
     private final ModelMapper modelMapper;
     private AccountService accountService;
-
+    private SessionManager sessionManager;
     @Autowired
-    public AccountController(ModelMapper modelMapper, AccountService accountService) {
+    public AccountController(ModelMapper modelMapper, AccountService accountService, SessionManager sessionManager) {
         this.modelMapper = modelMapper;
         this.accountService = accountService;
+        this.sessionManager = sessionManager;
     }
 
     @PostMapping("/login")
@@ -52,9 +55,14 @@ public class AccountController {
             return badRequest(errors);
         }
 
-        Cookie cookie = new Cookie("id", String.valueOf(result.getId()));
-        cookie.setMaxAge(3000);
-        response.addCookie(cookie);
+        sessionManager.createSession(accountDto, response);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping
+    public ResponseEntity logout(HttpServletRequest request){
+        sessionManager.expire(request);
 
         return ResponseEntity.ok().build();
     }
