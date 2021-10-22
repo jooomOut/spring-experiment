@@ -1,69 +1,57 @@
 package me.jooomout.demorestapistudy.accounts;
 
 import me.jooomout.demorestapistudy.common.ErrorsResource;
-import me.jooomout.demorestapistudy.events.*;
-import me.jooomout.demorestapistudy.session.SessionManager;
+import me.jooomout.demorestapistudy.session.SessionConst;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-import java.net.URI;
-import java.util.Optional;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import javax.servlet.http.HttpSession;
 
 @Controller
 @RequestMapping(value = "api/account", produces = MediaTypes.HAL_JSON_VALUE)
 public class AccountController {
 
     private final ModelMapper modelMapper;
-    private AccountService accountService;
-    private SessionManager sessionManager;
+    private final AccountService accountService;
     @Autowired
-    public AccountController(ModelMapper modelMapper, AccountService accountService, SessionManager sessionManager) {
+    public AccountController(ModelMapper modelMapper, AccountService accountService) {
         this.modelMapper = modelMapper;
         this.accountService = accountService;
-        this.sessionManager = sessionManager;
     }
 
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody @Validated AccountDto accountDto, BindingResult errors,
-                                HttpServletResponse response) {
+                                HttpServletRequest request) {
         if (errors.hasErrors()){
             return badRequest(errors);
         }
-        Account formAccount = dtoToEntity(accountDto);
-        Account result = accountService.login(formAccount);
+        Account result = accountService.login(dtoToEntity(accountDto));
         if (result == null){
             errors.reject("loginFail", "ID or PW is not correct.");
             return badRequest(errors);
         }
 
-        sessionManager.createSession(accountDto, response);
+        HttpSession session = request.getSession(true);
+        session.setAttribute(SessionConst.LOGIN_ACCOUNT, result);
 
         return ResponseEntity.ok().build();
     }
 
     @PostMapping
     public ResponseEntity logout(HttpServletRequest request){
-        sessionManager.expire(request);
-
+        HttpSession session = request.getSession(false);
+        if (session != null){
+            session.invalidate();
+        }
         return ResponseEntity.ok().build();
     }
 
