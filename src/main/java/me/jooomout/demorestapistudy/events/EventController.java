@@ -15,6 +15,7 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AuthorizationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,6 +26,8 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.Entity;
+import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 import java.net.URI;
 import java.util.Optional;
@@ -50,12 +53,13 @@ public class EventController {
                                       BindingResult errors,
                                       //Errors errors,
                                       @CurrentUser Account account) {
-        validateEvent(eventDto, errors);
+        var validation = validateEvent(eventDto, errors);
+        if (validation != null)
+            return validation;
 
         // Service Login
         Event event = modelMapper.map(eventDto, Event.class);
         Event newEvent = eventService.createEvent(event, account);
-
 
         // Hateos
         WebMvcLinkBuilder selfLinkBuilder = linkTo(EventController.class).slash(newEvent.getId());
@@ -73,8 +77,10 @@ public class EventController {
     public ResponseEntity queryEvents(Pageable pageable,
                                       PagedResourcesAssembler<Event> assembler,
                                       @CurrentUser Account account){
-        Page<Event> page = this.eventRepository.findAll(pageable); // page, size, sort 파라미터로 자동 완성해줌
-        var pagedResources = assembler.toModel(page, e -> new EventResource(e));
+
+        Page<Event> page = eventService.getEvents(pageable);
+
+        var pagedResources = assembler.toModel(page, EventResource::new);
         pagedResources.add(Link.of("/docs/index.html#resources-events-list").withRel("profile"));
         if (account != null){
             pagedResources.add(linkTo(EventController.class).withRel("create-event"));
@@ -85,12 +91,12 @@ public class EventController {
     @GetMapping("/{id}")
     public ResponseEntity getEvent(@PathVariable Integer id,
                                    @CurrentUser Account account){
-        Optional<Event> optionalEvent = eventRepository.findById(id);
-        if (optionalEvent.isEmpty()){
-            return ResponseEntity.notFound().build();
+        Event event;
+        try {
+            event = eventService.getEvent(id);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build(); //TODO: 에러 메세지 담기
         }
-
-        Event event = optionalEvent.get();
         EventResource eventResource = new EventResource(event);
         eventResource.add(Link.of("/docs/index.html#resources-events-get").withRel("profile")); // index.adoc 에 이름이 정의되어 있다.
         if (event.getManager() != null && event.getManager().equals(account)){
@@ -106,28 +112,24 @@ public class EventController {
                                       BindingResult errors,
                                       //Errors errors,
                                       @CurrentUser Account account){
-        Optional<Event> optionalEvent = eventRepository.findById(id);
-        if (optionalEvent.isEmpty()){
-            return ResponseEntity.notFound().build();
+        var validation = validateEvent(eventDto, errors);
+        if (validation != null)
+            return validation;
+
+        Event updatedEvent;
+        try {
+            updatedEvent = eventService.updateEvent(id, eventDto, account);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build(); //TODO: 에러 메세지 담기
+        } catch (AuthorizationServiceException e){
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED); //TODO 에러 메세지 담기
         }
-        if (errors.hasErrors()){
-            return badRequest(errors);
-        }
-        eventValidator.validate(eventDto, errors);
-        if (errors.hasErrors()){
-            return badRequest(errors);
-        }
-        Event existingEvent = optionalEvent.get();
-        if(existingEvent.getManager() != null &&!existingEvent.getManager().equals(account)){
-            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
-        }
-        modelMapper.map(eventDto, existingEvent);
-        Event updatedEvent = eventRepository.save(existingEvent);
 
         EventResource eventResource = new EventResource(updatedEvent);
         eventResource.add(Link.of("/docs/index.html#resources-events-update").withRel("profile"));
         return ResponseEntity.ok(eventResource);
     }
+
     private ResponseEntity badRequest(Errors errors){
         return ResponseEntity.badRequest().body(ErrorsResource.modelOf(errors));
     }
@@ -140,5 +142,6 @@ public class EventController {
         if (errors.hasErrors()){
             return badRequest(errors);
         }
+        return null;
     }
 }
