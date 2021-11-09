@@ -4,7 +4,9 @@ import me.jooomout.demorestapistudy.accounts.Account;
 import me.jooomout.demorestapistudy.accounts.AccountAdapter;
 import me.jooomout.demorestapistudy.accounts.CurrentUser;
 import me.jooomout.demorestapistudy.common.ErrorsResource;
+import org.apache.coyote.Response;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -33,14 +35,14 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 @RequestMapping(value = "api/events", produces = MediaTypes.HAL_JSON_VALUE)
 public class EventController {
 
-    private final EventRepository eventRepository;
     private final ModelMapper modelMapper;
     private final EventValidator eventValidator;
-
-    public EventController(EventRepository eventRepository, ModelMapper modelMapper, EventValidator eventValidator) {
-        this.eventRepository = eventRepository;
+    private EventService eventService;
+    @Autowired
+    public EventController(ModelMapper modelMapper, EventValidator eventValidator, EventService eventService) {
         this.modelMapper = modelMapper;
         this.eventValidator = eventValidator;
+        this.eventService = eventService;
     }
 
     @PostMapping
@@ -48,18 +50,12 @@ public class EventController {
                                       BindingResult errors,
                                       //Errors errors,
                                       @CurrentUser Account account) {
-        if (errors.hasErrors()){
-            return badRequest(errors);
-        }
-        eventValidator.validate(eventDto, errors);
-        if (errors.hasErrors()){
-            return badRequest(errors);
-        }
+        validateEvent(eventDto, errors);
 
+        // Service Login
         Event event = modelMapper.map(eventDto, Event.class);
-        event.update();
-        event.setManager(account);
-        Event newEvent = this.eventRepository.save(event);
+        Event newEvent = eventService.createEvent(event, account);
+
 
         // Hateos
         WebMvcLinkBuilder selfLinkBuilder = linkTo(EventController.class).slash(newEvent.getId());
@@ -69,6 +65,7 @@ public class EventController {
         eventResource.add(linkTo(EventController.class).withRel("query-events"));
         eventResource.add(selfLinkBuilder.withRel("update-event")); // 수정은 PUT 이라 링크가 같아도 괜찮다.
         eventResource.add(Link.of("/docs/index.html#resources-events-create").withRel("profile"));
+
         return ResponseEntity.created(createdUri).body(eventResource);
     }
 
@@ -135,4 +132,13 @@ public class EventController {
         return ResponseEntity.badRequest().body(ErrorsResource.modelOf(errors));
     }
 
+    private ResponseEntity validateEvent(EventDto eventDto, BindingResult errors) {
+        if (errors.hasErrors()){
+            return badRequest(errors);
+        }
+        eventValidator.validate(eventDto, errors);
+        if (errors.hasErrors()){
+            return badRequest(errors);
+        }
+    }
 }
